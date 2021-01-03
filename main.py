@@ -1,3 +1,4 @@
+import random
 import tkinter
 import datetime
 from datetime import time, date, datetime
@@ -8,7 +9,7 @@ class Game:
     def __init__(self, tk):
         self.dimensionX = 4
         self.dimensionY = 4
-        self.bombs = 10
+        self.bombs = 5
         self.seconds_left=0
         self.tk = tk
         self.frame = Frame(self.tk)
@@ -66,13 +67,30 @@ class Game:
                     L.grid(row=i, column=j)
                     L.bind('<Button-1>', lambda e, i=i, j=j: self.on_click(i, j, e))
 
-            self.printBoard()
+            #self.printRevealed()
 
 
         for i in range(self.dimensionX):
             for j in range(self.dimensionY):
                 self.board[i][j]=0
                 self.revealed[i][j]=0
+
+        self.setTheTable()
+        self.printBoard()
+
+
+    def setTheTable(self):
+
+        print(self.bombs)
+        for i in range(self.bombs):
+            rx=random.randint(0,self.dimensionX-1)
+            ry = random.randint(0, self.dimensionX - 1)
+            print(' am pus bomba')
+            self.board[rx][ry]=-1
+
+        for i in range(self.dimensionX):
+            for j in range(self.dimensionY):
+                self.adiacentBombs(i,j)
 
 
 
@@ -90,7 +108,7 @@ class Game:
         event.widget.config(image = self.icons["wrong"])
         self.revealed[i][j]=1;
         #self.printRevealed()
-        self.printBoard()
+        #self.printBoard()
 
 
     def countdown(self):
@@ -98,12 +116,23 @@ class Game:
 
         if self.seconds_left:
             self.seconds_left -= 1
-            print(self.seconds_left)
+            #print(self.seconds_left)
             self.frame.after(1000, self.countdown)
         else:
             print('game over')
 
+    def adiacentBombs(self,i,j):
+        count=0;
+        dx=[0,0,-1,-1,-1,1,1,1]
+        dy=[1,-1,0,1,-1,-1,0,1]
+        if self.board[i][j]==-1:
+            return
+        for c in range(8):
+            if(i+dx[c]>=0 and i+dx[c]<self.dimensionX and j+dy[c]>=0 and j+dy[c]<self.dimensionY):
+                if(self.board[i+dx[c]][j+dy[c]])==-1:
+                    count+=1
 
+        self.board[i][j]=count
 
 
     def start_game(self):
@@ -116,8 +145,8 @@ class Game:
         self.dimensionY=self.dimensionX
         print('size bombe')
         print(self.dimensionX)
-        bombs=int(self.minesSP.get())
-        print(bombs)
+        self.bombs=int(self.minesSP.get())
+        print(self.bombs)
         self.gameStarted = 1
 
         self.initialize()
