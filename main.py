@@ -83,6 +83,7 @@ class Game:
                 self.revealed[i][j]=0
 
         self.setTheTable()
+
         #self.printBoard()
         #self.printRevealed()
 
@@ -115,7 +116,9 @@ class Game:
     def on_click(self,i, j, event):
         #event.widget.config(image = self.icons["wrong"])
         self.revealed[i][j]=1;
-
+        if(self.board[i][j]==-1):
+            self.gameOverMine()
+            return
 
         #self.on_click( i+1, j, event)
         self.refreshBoard(i,j)
@@ -139,7 +142,7 @@ class Game:
         if(self.board[i][j]>0):
             return
         if(self.board[i][j]==-1):
-            self.squares[i][j].config(image=self.icons["wrong"])
+            self.squares[i][j].config(image=self.icons["mine"])
             return
         dx = [0, 0, -1, -1, -1, 1, 1, 1]
         dy = [1, -1, 0, 1, -1, -1, 0, 1]
@@ -160,8 +163,32 @@ class Game:
             self.frame.after(1000, self.countdown)
         else:
             print('game over')
+            self.gameOverTime()
+
+    def gameOverTime(self):
+        self.timeLabel['text'] ="Game Over"
+        for i in range(self.dimensionX):
+            for j in range(self.dimensionY):
+                self.setNumbers(i,j)
+                if(self.board[i][j]==-1):
+                    self.squares[i][j].config(image=self.icons["mine"])
+
+    def gameOverMine(self):
+        self.seconds_left = 0
+        self.timeLabel['text'] = "Game Over"
+        for i in range(self.dimensionX):
+            for j in range(self.dimensionY):
+                self.setNumbers(i, j)
+                if (self.board[i][j] == -1):
+
+                    self.squares[i][j].config(image=self.icons["mine"])
+
+    def gameWon(self):
+        pass
 
     def setNumbers(self,i,j):
+        if (self.board[i][j] == 0):
+            self.squares[i][j].config(image=self.icons["clicked"])
         if(self.board[i][j]==1):
             self.squares[i][j].config(image=self.icons["one"])
         if (self.board[i][j] == 2):
