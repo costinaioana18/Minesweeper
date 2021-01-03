@@ -17,8 +17,6 @@ class Game:
         self.frame2 = Frame(self.tk)
         self.frame2.pack()
         self.gameStarted=0
-
-
         self.beginning = datetime.now()
         self.counter = 0
         self.icons = {
@@ -35,8 +33,6 @@ class Game:
             "six": PhotoImage(file="icons/6.gif"),
             "seven": PhotoImage(file="icons/7.gif"),
             "eight": PhotoImage(file="icons/8.gif"),
-
-
         }
         self.timeLabel=tkinter.Label(self.frame, text = "Time left: unset")
         self.timeLabel.grid(row=self.dimensionX, column=0, columnspan=self.dimensionY)
@@ -68,7 +64,7 @@ class Game:
     def initialize(self):
         self.board = [[None] * self.dimensionX for _ in range(self.dimensionY)]
         self.revealed = [[None] * self.dimensionX for _ in range(self.dimensionY)]
-
+        self.flagged = [[None] * self.dimensionX for _ in range(self.dimensionY)]
         self.squares=[[None] * self.dimensionX for _ in range(self.dimensionY)]
         if self.gameStarted:
             for i in range(self.dimensionX):
@@ -76,6 +72,7 @@ class Game:
                     self.squares[i][j] = tkinter.Label(self.frame2, text='    ', image=self.icons["plain"])
                     self.squares[i][j].grid(row=i, column=j)
                     self.squares[i][j].bind('<Button-1>', lambda e, i=i, j=j: self.on_click(i, j, e))
+                    self.squares[i][j].bind('<Button-3>', lambda e, i=i, j=j: self.right_click(i, j, e))
 
             #self.printRevealed()
 
@@ -86,7 +83,8 @@ class Game:
                 self.revealed[i][j]=0
 
         self.setTheTable()
-        self.printBoard()
+        #self.printBoard()
+        #self.printRevealed()
 
 
     def setTheTable(self):
@@ -119,17 +117,27 @@ class Game:
         self.revealed[i][j]=1;
 
 
-
-
         #self.on_click( i+1, j, event)
         self.refreshBoard(i,j)
+        self.printRevealed()
         #self.printRevealed()
         #self.printBoard()
+
+    def right_click(self,i,j,event):
+        print("right cli")
+        if(self.revealed[i][j]==0):
+            if(self.flagged[i][j]):
+                self.squares[i][j].config(image=self.icons["plain"])
+            else:
+                self.squares[i][j].config(image=self.icons["flag"])
+                self.flagged[i][j]=1;
 
     def refreshBoard(self,i,j):
         self.revealed[i][j]=1
         self.squares[i][j].config(image=self.icons["clicked"])
         self.setNumbers(i,j)
+        if(self.board[i][j]>0):
+            return
         if(self.board[i][j]==-1):
             self.squares[i][j].config(image=self.icons["wrong"])
             return
@@ -140,7 +148,7 @@ class Game:
                     if(self.board[i+dx[c]][j+dy[c]]>=0 and self.board[i][j]==0):
                         self.squares[i+dx[c]][j+dy[c]].config(image=self.icons["clicked"])
                         self.setNumbers(i+dx[c],j+dy[c])
-                        if(self.board[i+dx[c]][j+dy[c]]==0 and self.revealed[i+dx[c]][j+dy[c]]==0):
+                        if(self.board[i+dx[c]][j+dy[c]]>=0 and self.revealed[i+dx[c]][j+dy[c]]==0):
                             self.refreshBoard(i+dx[c],j+dy[c])
 
     def countdown(self):
