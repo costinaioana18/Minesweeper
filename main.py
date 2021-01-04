@@ -14,7 +14,7 @@ class Game:
         self.tk = tk
         self.frame = Frame(self.tk)
         self.frame.pack()
-
+        self.won=0
         self.gameStarted=0
         self.gameRestarted=0
         self.beginning = datetime.now()
@@ -37,19 +37,25 @@ class Game:
         self.timeLabel=tkinter.Label(self.frame, text = "Time left: unset")
         self.timeLabel.grid(row=self.dimensionX, column=0, columnspan=self.dimensionY)
         self.bombLabel = tkinter.Label(self.frame, text="Bombs:")
-        self.minesSP = Spinbox(self.frame, from_=1, to=20)
+        self.minesSP = Spinbox(self.frame, from_=1, to=40)
         self.minesSP.grid(row=self.dimensionX + 1, column=10, columnspan=self.dimensionX)
         self.bombLabel.grid(row=self.dimensionX+1, column=0, columnspan=self.dimensionX)
-        self.sizeLabel = tkinter.Label(self.frame, text="Size:")
+        self.sizeLabel = tkinter.Label(self.frame, text="Size x:")
         self.sizeLabel.grid(row=self.dimensionX+2, column=0, columnspan=self.dimensionX)
         self.sizeSP = Spinbox(self.frame, from_=4, to=30)
         self.sizeSP.grid(row=self.dimensionX + 2, column=10, columnspan=self.dimensionX)
+
+        self.sizeLabel2 = tkinter.Label(self.frame, text="Size y:")
+        self.sizeLabel2.grid(row=self.dimensionX + 3, column=0, columnspan=self.dimensionX)
+        self.sizeSP2 = Spinbox(self.frame, from_=4, to=30)
+        self.sizeSP2.grid(row=self.dimensionX + 3, column=10, columnspan=self.dimensionX)
+
         self.timeLimitLabel = tkinter.Label(self.frame, text="Time limit:")
-        self.timeLimitLabel.grid(row=self.dimensionX + 3, column=0, columnspan=self.dimensionX)
+        self.timeLimitLabel.grid(row=self.dimensionX + 4, column=0, columnspan=self.dimensionX)
         self.timeEntry=tkinter.Entry(self.frame)
-        self.timeEntry.grid(row=self.dimensionX + 3, column=10, columnspan=self.dimensionX)
+        self.timeEntry.grid(row=self.dimensionX + 4, column=10, columnspan=self.dimensionX)
         self.startBtn = tkinter.Button(self.frame, text="Start", command=self.start_game)
-        self.startBtn.grid(row=self.dimensionX + 4, column=0, columnspan=self.dimensionX)
+        self.startBtn.grid(row=self.dimensionX + 5, column=0, columnspan=self.dimensionX)
 
         # if(self.gameStarted):
         #     for i in range(self.dimensionX):
@@ -64,13 +70,20 @@ class Game:
     def initialize(self):
         self.frame2 = Frame(self.tk)
         self.frame2.pack()
-        self.board = [[None] * self.dimensionX for _ in range(self.dimensionY)]
-        self.revealed = [[None] * self.dimensionX for _ in range(self.dimensionY)]
-        self.flagged = [[None] * self.dimensionX for _ in range(self.dimensionY)]
-        self.squares=[[None] * self.dimensionX for _ in range(self.dimensionY)]
+        print("dimensiuni")
+        print(self.dimensionX)
+        print(self.dimensionY)
+        self.board = [[None] * self.dimensionY for _ in range(self.dimensionX)]
+        self.revealed = [[None] * self.dimensionY for _ in range(self.dimensionX)]
+        self.flagged = [[None] * self.dimensionY for _ in range(self.dimensionX)]
+        self.squares=[[None] * self.dimensionY for _ in range(self.dimensionX)]
+        print(self.squares)
         if self.gameStarted:
             for i in range(self.dimensionX):
                 for j in range(self.dimensionY):
+                    print("dimensiuni")
+                    print(self.dimensionX)
+                    print(self.dimensionY)
                     self.squares[i][j] = tkinter.Label(self.frame2, text='    ', image=self.icons["plain"])
                     self.squares[i][j].grid(row=i, column=j)
                     self.squares[i][j].bind('<Button-1>', lambda e, i=i, j=j: self.on_click(i, j, e))
@@ -95,7 +108,7 @@ class Game:
         print(self.bombs)
         for i in range(self.bombs):
             rx=random.randint(0,self.dimensionX-1)
-            ry = random.randint(0, self.dimensionX - 1)
+            ry = random.randint(0, self.dimensionY - 1)
             print(' am pus bomba')
             self.board[rx][ry]=-1
 
@@ -120,11 +133,15 @@ class Game:
         self.revealed[i][j]=1;
         if(self.board[i][j]==-1):
             self.gameOverMine()
+            self.squares[i][j].config(image=self.icons["wrong"])
             return
 
         #self.on_click( i+1, j, event)
         self.refreshBoard(i,j)
         self.printRevealed()
+        if (self.getUnrevealed() == self.bombs and self.getFlagged() == self.bombs):
+            print("am castigat am castigat")
+            self.gameWon()
         #self.printRevealed()
         #self.printBoard()
 
@@ -133,9 +150,13 @@ class Game:
         if(self.revealed[i][j]==0):
             if(self.flagged[i][j]):
                 self.squares[i][j].config(image=self.icons["plain"])
+                self.flagged[i][j] = 0;
             else:
                 self.squares[i][j].config(image=self.icons["flag"])
                 self.flagged[i][j]=1;
+        if(self.getUnrevealed()==self.bombs and self.getFlagged()==self.bombs):
+            print("am castigat am castigat")
+            self.gameWon()
 
     def refreshBoard(self,i,j):
         self.revealed[i][j]=1
@@ -157,15 +178,16 @@ class Game:
                             self.refreshBoard(i+dx[c],j+dy[c])
 
     def countdown(self):
-        self.timeLabel['text'] = "Time left: " + str(self.seconds_left)
+        if(self.won==0):
+            self.timeLabel['text'] = "Time left: " + str(self.seconds_left)
 
-        if self.seconds_left:
-            self.seconds_left -= 1
-            #print(self.seconds_left)
-            self.frame.after(1000, self.countdown)
-        else:
-            print('game over')
-            self.gameOverTime()
+            if self.seconds_left:
+                self.seconds_left -= 1
+                #print(self.seconds_left)
+                self.frame.after(1000, self.countdown)
+            else:
+                print('game over')
+                self.gameOverTime()
 
     def gameOverTime(self):
         self.timeLabel['text'] ="Game Over"
@@ -191,7 +213,8 @@ class Game:
                     self.squares[i][j].config(image=self.icons["mine"])
 
     def gameWon(self):
-        pass
+        self.won=1
+        self.timeLabel['text'] = "You won"
 
     def setNumbers(self,i,j):
         if (self.board[i][j] == 0):
@@ -226,17 +249,32 @@ class Game:
 
         self.board[i][j]=count
 
+    def getUnrevealed(self):
+        count=0
+        for i in range(self.dimensionX):
+            for j in range(self.dimensionY):
+                if(self.revealed[i][j]==0):
+                    count+=1
+        return count
 
+    def getFlagged(self):
+        count=0
+        for i in range(self.dimensionX):
+            for j in range(self.dimensionY):
+                if (self.flagged[i][j] == 1 and self.board[i][j]==-1):
+                    count += 1
+        return count
 
 
     def start_game(self):
-
+        self.won=0
         #starting the countdown
         self.seconds_left = int(self.timeEntry.get())
         print(self.seconds_left)
         self.countdown()
         self.dimensionX=int(self.sizeSP.get())
-        self.dimensionY=self.dimensionX
+
+        self.dimensionY=int(self.sizeSP2.get())
         print('size bombe')
         print(self.dimensionX)
         self.bombs=int(self.minesSP.get())
