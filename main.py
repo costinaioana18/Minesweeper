@@ -14,9 +14,9 @@ class Game:
         self.tk = tk
         self.frame = Frame(self.tk)
         self.frame.pack()
-        self.frame2 = Frame(self.tk)
-        self.frame2.pack()
+
         self.gameStarted=0
+        self.gameRestarted=0
         self.beginning = datetime.now()
         self.counter = 0
         self.icons = {
@@ -62,6 +62,8 @@ class Game:
         #     self.printBoard()
 
     def initialize(self):
+        self.frame2 = Frame(self.tk)
+        self.frame2.pack()
         self.board = [[None] * self.dimensionX for _ in range(self.dimensionY)]
         self.revealed = [[None] * self.dimensionX for _ in range(self.dimensionY)]
         self.flagged = [[None] * self.dimensionX for _ in range(self.dimensionY)]
@@ -173,6 +175,11 @@ class Game:
                 if(self.board[i][j]==-1):
                     self.squares[i][j].config(image=self.icons["mine"])
 
+
+
+
+
+
     def gameOverMine(self):
         self.seconds_left = 0
         self.timeLabel['text'] = "Game Over"
@@ -235,8 +242,11 @@ class Game:
         self.bombs=int(self.minesSP.get())
         print(self.bombs)
         self.gameStarted = 1
-
+        if(self.gameRestarted):
+            self.frame2.destroy()
         self.initialize()
+        self.gameRestarted=1;
+
 
 
 
