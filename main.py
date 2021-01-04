@@ -7,6 +7,7 @@ from tkinter import *
 
 class Game:
     def __init__(self, tk):
+        self.questionOn=0
         self.dimensionX = 4
         self.dimensionY = 4
         self.bombs = 5
@@ -33,6 +34,7 @@ class Game:
             "six": PhotoImage(file="icons/6.gif"),
             "seven": PhotoImage(file="icons/7.gif"),
             "eight": PhotoImage(file="icons/8.gif"),
+            "question": PhotoImage(file="icons/question.gif"),
         }
         self.timeLabel=tkinter.Label(self.frame, text = "Time left: unset")
         self.timeLabel.grid(row=self.dimensionX, column=0, columnspan=self.dimensionY)
@@ -56,6 +58,9 @@ class Game:
         self.timeEntry.grid(row=self.dimensionX + 4, column=10, columnspan=self.dimensionX)
         self.startBtn = tkinter.Button(self.frame, text="Start", command=self.start_game)
         self.startBtn.grid(row=self.dimensionX + 5, column=0, columnspan=self.dimensionX)
+
+        self.questionBtn=tkinter.Button(self.frame, image=self.icons["flag"], command=self.questionSwitch)
+        self.questionBtn.grid(row=self.dimensionX + 5, column=self.dimensionX, columnspan=self.dimensionX)
 
         # if(self.gameStarted):
         #     for i in range(self.dimensionX):
@@ -116,7 +121,13 @@ class Game:
             for j in range(self.dimensionY):
                 self.adiacentBombs(i,j)
 
-
+    def questionSwitch(self):
+        if self.questionOn:
+            self.questionOn=0
+            self.questionBtn.config(image=self.icons["flag"])
+        else:
+            self.questionOn=1
+            self.questionBtn.config(image=self.icons["question"])
 
     def printBoard(self):
         for i in range(self.dimensionX):
@@ -152,7 +163,10 @@ class Game:
                 self.squares[i][j].config(image=self.icons["plain"])
                 self.flagged[i][j] = 0;
             else:
-                self.squares[i][j].config(image=self.icons["flag"])
+                if(self.questionOn):
+                    self.squares[i][j].config(image=self.icons["question"])
+                else:
+                    self.squares[i][j].config(image=self.icons["flag"])
                 self.flagged[i][j]=1;
         if(self.getUnrevealed()==self.bombs and self.getFlagged()==self.bombs):
             print("am castigat am castigat")
