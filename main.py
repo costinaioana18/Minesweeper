@@ -2,10 +2,10 @@ import random
 import tkinter
 import datetime
 from datetime import time, date, datetime
-from time import sleep
 from tkinter import *
 
 class Game:
+    #creating game settings label
     def __init__(self, tk):
         self.questionOn=0
         self.dimensionX = 4
@@ -62,33 +62,25 @@ class Game:
         self.questionBtn=tkinter.Button(self.frame, image=self.icons["flag"], command=self.questionSwitch)
         self.questionBtn.grid(row=self.dimensionX + 5, column=self.dimensionX, columnspan=self.dimensionX)
 
-        # if(self.gameStarted):
-        #     for i in range(self.dimensionX):
-        #         for j in range(self.dimensionY):
-        #             L = tkinter.Label(self.frame, text='    ', image = self.icons["plain"])
-        #             L.grid(row=i, column=j)
-        #             L.bind('<Button-1>', lambda e, i=i, j=j: self.on_click(i, j, e))
-        #
-        #     self.initialize()
-        #     self.printBoard()
 
+    #initializing the boards
     def initialize(self):
         self.frame2 = Frame(self.tk)
         self.frame2.pack()
-        print("dimensiuni")
-        print(self.dimensionX)
-        print(self.dimensionY)
+        #print("dimensiuni")
+        #print(self.dimensionX)
+        #print(self.dimensionY)
         self.board = [[None] * self.dimensionY for _ in range(self.dimensionX)]
         self.revealed = [[None] * self.dimensionY for _ in range(self.dimensionX)]
         self.flagged = [[None] * self.dimensionY for _ in range(self.dimensionX)]
         self.squares=[[None] * self.dimensionY for _ in range(self.dimensionX)]
-        print(self.squares)
+        #print(self.squares)
         if self.gameStarted:
             for i in range(self.dimensionX):
                 for j in range(self.dimensionY):
-                    print("dimensiuni")
-                    print(self.dimensionX)
-                    print(self.dimensionY)
+                    #print("dimensiuni")
+                    #print(self.dimensionX)
+                    #print(self.dimensionY)
                     self.squares[i][j] = tkinter.Label(self.frame2, text='    ', image=self.icons["plain"])
                     self.squares[i][j].grid(row=i, column=j)
                     self.squares[i][j].bind('<Button-1>', lambda e, i=i, j=j: self.on_click(i, j, e))
@@ -107,20 +99,21 @@ class Game:
         #self.printBoard()
         #self.printRevealed()
 
-
+    #ransomly setting the mines on the table
     def setTheTable(self):
 
-        print(self.bombs)
+        #print(self.bombs)
         for i in range(self.bombs):
             rx=random.randint(0,self.dimensionX-1)
             ry = random.randint(0, self.dimensionY - 1)
-            print(' am pus bomba')
+            #print(' am pus bomba')
             self.board[rx][ry]=-1
 
         for i in range(self.dimensionX):
             for j in range(self.dimensionY):
                 self.adiacentBombs(i,j)
 
+    #setting the mark when right clicking: flag/ question mark
     def questionSwitch(self):
         if self.questionOn:
             self.questionOn=0
@@ -129,16 +122,18 @@ class Game:
             self.questionOn=1
             self.questionBtn.config(image=self.icons["question"])
 
+    #printing the board
     def printBoard(self):
         for i in range(self.dimensionX):
             print(self.board[i])
 
+    #printing the revealed matrix
     def printRevealed(self):
         for i in range(self.dimensionX):
             print(self.revealed[i])
 
 
-
+    #when clicking a square tile it gets revealed
     def on_click(self,i, j, event):
         #event.widget.config(image = self.icons["wrong"])
         self.revealed[i][j]=1;
@@ -156,8 +151,9 @@ class Game:
         #self.printRevealed()
         #self.printBoard()
 
+    # when right clicking a square tile, it gets flagged or question marked
     def right_click(self,i,j,event):
-        print("right cli")
+        #print("right cli")
         if(self.revealed[i][j]==0):
             if(self.flagged[i][j]):
                 self.squares[i][j].config(image=self.icons["plain"])
@@ -172,6 +168,7 @@ class Game:
             print("am castigat am castigat")
             self.gameWon()
 
+    #the board is refreshed, meaning the value of the adiacent* tiles is shown(according to the game rules)
     def refreshBoard(self,i,j):
         self.revealed[i][j]=1
         self.squares[i][j].config(image=self.icons["clicked"])
@@ -191,6 +188,7 @@ class Game:
                         if(self.board[i+dx[c]][j+dy[c]]>=0 and self.revealed[i+dx[c]][j+dy[c]]==0):
                             self.refreshBoard(i+dx[c],j+dy[c])
 
+    #countdown
     def countdown(self):
         if(self.won==0):
             self.timeLabel['text'] = "Time left: " + str(self.seconds_left)
@@ -200,9 +198,11 @@ class Game:
                 #print(self.seconds_left)
                 self.frame.after(1000, self.countdown)
             else:
-                print('game over')
+                #print('game over')
                 self.gameOverTime()
 
+
+    #the game is over - time exceeded
     def gameOverTime(self):
         self.timeLabel['text'] ="Game Over"
         for i in range(self.dimensionX):
@@ -212,10 +212,7 @@ class Game:
                     self.squares[i][j].config(image=self.icons["mine"])
 
 
-
-
-
-
+    # the game us iver- a mine was clicked
     def gameOverMine(self):
         self.seconds_left = 0
         self.timeLabel['text'] = "Game Over"
@@ -226,6 +223,7 @@ class Game:
 
                     self.squares[i][j].config(image=self.icons["mine"])
 
+    #the player won
     def gameWon(self):
         self.won=1
         self.timeLabel['text'] = "You won"
@@ -250,6 +248,7 @@ class Game:
         if (self.board[i][j] == 8):
             self.squares[i][j].config(image=self.icons["eight"])
 
+    #count the number of adiacent mines
     def adiacentBombs(self,i,j):
         count=0;
         dx=[0,0,-1,-1,-1,1,1,1]
@@ -263,6 +262,7 @@ class Game:
 
         self.board[i][j]=count
 
+    #returns the number of unrevelead square tiles
     def getUnrevealed(self):
         count=0
         for i in range(self.dimensionX):
@@ -271,6 +271,7 @@ class Game:
                     count+=1
         return count
 
+    #returns the number of flagged tiles
     def getFlagged(self):
         count=0
         for i in range(self.dimensionX):
@@ -279,27 +280,28 @@ class Game:
                     count += 1
         return count
 
-
+    #starts/restart the game
     def start_game(self):
         self.won=0
         #starting the countdown
-        self.seconds_left = int(self.timeEntry.get())
-        print(self.seconds_left)
+        if(self.timeEntry.get()):
+            self.seconds_left = int(self.timeEntry.get())
+        else:
+            self.seconds_left=100
+        #print(self.seconds_left)
         self.countdown()
         self.dimensionX=int(self.sizeSP.get())
 
         self.dimensionY=int(self.sizeSP2.get())
-        print('size bombe')
-        print(self.dimensionX)
+        #print('size bombe')
+        #print(self.dimensionX)
         self.bombs=int(self.minesSP.get())
-        print(self.bombs)
+        #print(self.bombs)
         self.gameStarted = 1
         if(self.gameRestarted):
             self.frame2.destroy()
         self.initialize()
         self.gameRestarted=1;
-
-
 
 
 if __name__ == '__main__':
