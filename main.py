@@ -20,6 +20,7 @@ class Game:
         self.gameRestarted=0
         self.beginning = datetime.now()
         self.counter = 0
+        #the icons were taken from here: https://github.com/ripexz/python-tkinter-minesweeper
         self.icons = {
             "plain": PhotoImage(file="icons/tile_plain.gif"),
             "clicked": PhotoImage(file="icons/tile_clicked.gif"),
